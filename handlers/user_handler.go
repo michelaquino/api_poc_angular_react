@@ -39,8 +39,49 @@ func (UserHandler) GetAllUsers(echoContext echo.Context) error {
 		return echoContext.NoContent(http.StatusInternalServerError)
 	}
 
+	logger.Info("[UserHandler][CreateUser] userList: ", userList)
+	if userList == nil {
+		logger.Info("[UserHandler][CreateUser] userList is nil")
+		userList = []userModel{}
+	}
+
 	logger.Info("[UserHandler][GetAllUsers] Get all users with success")
 	return echoContext.JSON(http.StatusOK, userList)
+}
+
+func (UserHandler) CreateUser(echoContext echo.Context) error {
+	logger := context.GetAPIContext().GetLogger()
+	logger.Info("[UserHandler][CreateUser] Getting all users")
+
+	user := new(userModel)
+	if err := echoContext.Bind(user); err != nil {
+		logger.Error("[UserHandler][CreateUser] Error on bind request json: ", err.Error())
+		return echoContext.String(http.StatusBadRequest, "Invalid parameters")
+	}
+
+	if user.Name == "" {
+		logger.Error("[UserHandler][CreateUser] User name is required")
+		return echoContext.String(http.StatusBadRequest, "User name is required")
+	}
+
+	if user.Email == "" {
+		logger.Error("[UserHandler][CreateUser] User email is required")
+		return echoContext.String(http.StatusBadRequest, "User email is required")
+	}
+
+	if user.Gender == "" {
+		logger.Error("[UserHandler][CreateUser] User gender is required")
+		return echoContext.String(http.StatusBadRequest, "User gander is required")
+	}
+
+	err := createUserOnDatabase(user)
+	if err != nil {
+		logger.Info("[UserHandler][CreateUser] Error on created user: ", err.Error())
+		return echoContext.NoContent(http.StatusInternalServerError)
+	}
+
+	logger.Info("[UserHandler][CreateUser] User created with success")
+	return echoContext.NoContent(http.StatusCreated)
 }
 
 func getUserListFromDatabase() ([]userModel, error) {
@@ -62,38 +103,7 @@ func getUserListFromDatabase() ([]userModel, error) {
 	return userList, nil
 }
 
-func (UserHandler) CreateUser(echoContext echo.Context) error {
-	logger := context.GetAPIContext().GetLogger()
-	logger.Info("[UserHandler][CreateUser] Getting all users")
-
-	user := new(userModel)
-	if err := echoContext.Bind(user); err != nil {
-		logger.Error("[UserHandler][CreateUser] Error on bind request json")
-		return echoContext.String(http.StatusBadRequest, "Invalid parameters")
-	}
-
-	userList, err := getUserListFromDatabase()
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			logger.Info("[UserHandler][CreateUser] Users not found")
-			return echoContext.JSON(http.StatusOK, []userModel{})
-		}
-
-		logger.Info("[UserHandler][CreateUser] Unexpected error: ", err.Error())
-		return echoContext.NoContent(http.StatusInternalServerError)
-	}
-
-	logger.Info("[UserHandler][CreateUser] userList: ", userList)
-	if userList == nil {
-		logger.Info("[UserHandler][CreateUser] userList is nil")
-		userList = []userModel{}
-	}
-
-	logger.Info("[UserHandler][CreateUser] Get all users with success")
-	return echoContext.JSON(http.StatusOK, userList)
-}
-
-func createUserOnDatabase(user userModel) error {
+func createUserOnDatabase(user *userModel) error {
 	logger := context.GetAPIContext().GetLogger()
 	logger.Info("[createUserOnDatabase] Getting all users from database")
 

@@ -22,6 +22,7 @@ func main() {
 	userHandler := handlers.UserHandler{}
 
 	e.GET("/user", userHandler.GetAllUsers)
+	e.POST("/user", userHandler.CreateUser)
 
 	logger.Info("Started at port 8888!")
 	e.Logger.Fatal(e.Start(":8888"))
