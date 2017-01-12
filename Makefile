@@ -4,8 +4,7 @@ GOPATH 				:= $(shell go env GOPATH)
 PROJECT_PKGS        := $(shell $(GOCMD) list ./... | grep -v '/vendor/')
 
 .PHONY: run
-run: 
-	$(GOCMD) run -race main.go
+run: docker-compose-build-api docker-compose-up-api
 
 .PHONY: test
 test: setup
