@@ -10,10 +10,24 @@
 			"tree": true
 		},
 		{
+			"checksumSHA1": "XPp37U5gsrpdchPIsMMGZfB88Gs=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "a601269ab70c205d26370c16f7c81e9017c14e04",
+			"revisionTime": "2017-01-04T18:22:50Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "D3ye29dLUp2pD8QjY/wxMuRc8jo=",
 			"path": "github.com/labstack/echo",
 			"revision": "8d504c1b699c757b267255c53b3e5219f9974abc",
 			"revisionTime": "2016-12-02T17:28:18Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "NvfQq6Y6kh9cMw+y1m00ivEd5b4=",
+			"path": "github.com/labstack/gommon/bytes",
+			"revision": "f72d3c883f8ea180da8f085dd320804c41332ad1",
+			"revisionTime": "2017-01-12T04:03:50Z",
 			"tree": true
 		},
 		{
@@ -26,6 +40,13 @@
 		{
 			"checksumSHA1": "uHA6zbtxzJce4r+6uk8zu11qkuk=",
 			"path": "github.com/labstack/gommon/log",
+			"revision": "f72d3c883f8ea180da8f085dd320804c41332ad1",
+			"revisionTime": "2017-01-12T04:03:50Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "XvsHo25Kr69E5xxTDatXzCQc6sI=",
+			"path": "github.com/labstack/gommon/random",
 			"revision": "f72d3c883f8ea180da8f085dd320804c41332ad1",
 			"revisionTime": "2017-01-12T04:03:50Z",
 			"tree": true
