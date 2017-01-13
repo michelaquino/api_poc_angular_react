@@ -41,7 +41,6 @@ func (UserHandler) GetAllUsers(echoContext echo.Context) error {
 		return echoContext.NoContent(http.StatusInternalServerError)
 	}
 
-	logger.Info("[UserHandler][CreateUser] userList: ", userList)
 	if userList == nil {
 		logger.Info("[UserHandler][CreateUser] userList is nil")
 		userList = []userModel{}
@@ -166,8 +165,10 @@ func deleteUser(userID string) error {
 	session := context.GetAPIContext().GetMongoSession()
 	defer session.Close()
 
+	objID := bson.ObjectIdHex(userID)
+
 	connection := session.DB("api").C("users")
-	err := connection.RemoveId(userID)
+	err := connection.RemoveId(objID)
 	if err != nil {
 		logger.Error("[deleteUser] Error on delete user on database: ", err.Error())
 		return err
