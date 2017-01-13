@@ -4,16 +4,24 @@ import (
 	"net/http"
 
 	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/labstack/echo"
 	"github.com/michelaquino/api_poc_angular_react/context"
 )
 
 type userModel struct {
-	ID     string `json:"id,omitempty" bson:"_id,omitempty"`
-	Name   string `json:"name,omitempty" bson:"name,omitempty"`
-	Email  string `json:"email,omitempty" bson:"email,omitempty"`
-	Gender string `json:"gender,omitempty" bson:"gender,omitempty"`
+	ID     bson.ObjectId `bson:"_id,omitempty"`
+	Name   string        `bson:"name,omitempty"`
+	Email  string        `bson:"email,omitempty"`
+	Gender string        `bson:"gender,omitempty"`
+}
+
+type userRepr struct {
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Email  string `json:"email,omitempty"`
+	Gender string `json:"gender,omitempty"`
 }
 
 type UserHandler struct{}
@@ -21,12 +29,6 @@ type UserHandler struct{}
 func (UserHandler) GetAllUsers(echoContext echo.Context) error {
 	logger := context.GetAPIContext().GetLogger()
 	logger.Info("[UserHandler][GetAllUsers] Getting all users")
-
-	user := new(userModel)
-	if err := echoContext.Bind(user); err != nil {
-		logger.Error("[UserHandler][GetAllUsers] Error on bind request json")
-		return echoContext.String(http.StatusBadRequest, "Invalid parameters")
-	}
 
 	userList, err := getUserListFromDatabase()
 	if err != nil {
@@ -45,15 +47,29 @@ func (UserHandler) GetAllUsers(echoContext echo.Context) error {
 		userList = []userModel{}
 	}
 
+	userReprList := []userRepr{}
+	for _, user := range userList {
+		userRepresentation := userRepr{
+			ID:     user.ID.Hex(),
+			Email:  user.Email,
+			Name:   user.Name,
+			Gender: user.Gender,
+		}
+
+		logger.Info("MICHEL => user: ", user)
+		logger.Info("MICHEL => userRepresentation: ", userRepresentation)
+		userReprList = append(userReprList, userRepresentation)
+	}
+
 	logger.Info("[UserHandler][GetAllUsers] Get all users with success")
-	return echoContext.JSON(http.StatusOK, userList)
+	return echoContext.JSON(http.StatusOK, userReprList)
 }
 
 func (UserHandler) CreateUser(echoContext echo.Context) error {
 	logger := context.GetAPIContext().GetLogger()
 	logger.Info("[UserHandler][CreateUser] Getting all users")
 
-	user := new(userModel)
+	user := new(userRepr)
 	if err := echoContext.Bind(user); err != nil {
 		logger.Error("[UserHandler][CreateUser] Error on bind request json: ", err.Error())
 		return echoContext.String(http.StatusBadRequest, "Invalid parameters")
@@ -74,14 +90,26 @@ func (UserHandler) CreateUser(echoContext echo.Context) error {
 		return echoContext.String(http.StatusBadRequest, "User gander is required")
 	}
 
-	err := createUserOnDatabase(user)
+	newUserModel := &userModel{
+		Email:  user.Email,
+		Name:   user.Name,
+		Gender: user.Gender,
+	}
+	err := createUserOnDatabase(newUserModel)
 	if err != nil {
 		logger.Info("[UserHandler][CreateUser] Error on created user: ", err.Error())
 		return echoContext.NoContent(http.StatusInternalServerError)
 	}
 
+	userRepresentation := userRepr{
+		ID:     newUserModel.ID.Hex(),
+		Email:  newUserModel.Email,
+		Name:   newUserModel.Name,
+		Gender: newUserModel.Gender,
+	}
+
 	logger.Info("[UserHandler][CreateUser] User created with success")
-	return echoContext.NoContent(http.StatusCreated)
+	return echoContext.JSON(http.StatusCreated, userRepresentation)
 }
 
 func getUserListFromDatabase() ([]userModel, error) {
@@ -110,12 +138,17 @@ func createUserOnDatabase(user *userModel) error {
 	session := context.GetAPIContext().GetMongoSession()
 	defer session.Close()
 
+	id := bson.NewObjectId()
+	user.ID = id
+
 	connection := session.DB("api").C("users")
 	err := connection.Insert(user)
 	if err != nil {
 		logger.Error("[createUserOnDatabase] Error on insert user on database: ", err.Error())
 		return err
 	}
+
+	logger.Info("user: ", user)
 
 	return nil
 }
