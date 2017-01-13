@@ -23,6 +23,7 @@ func main() {
 
 	e.GET("/users", userHandler.GetAllUsers)
 	e.POST("/user", userHandler.CreateUser)
+	e.DELETE("/user/:id", userHandler.DeleteUser)
 
 	logger.Info("Started at port 8888!")
 	e.Logger.Fatal(e.Start(":8888"))

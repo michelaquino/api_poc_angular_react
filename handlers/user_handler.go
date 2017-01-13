@@ -56,8 +56,6 @@ func (UserHandler) GetAllUsers(echoContext echo.Context) error {
 			Gender: user.Gender,
 		}
 
-		logger.Info("MICHEL => user: ", user)
-		logger.Info("MICHEL => userRepresentation: ", userRepresentation)
 		userReprList = append(userReprList, userRepresentation)
 	}
 
@@ -112,6 +110,16 @@ func (UserHandler) CreateUser(echoContext echo.Context) error {
 	return echoContext.JSON(http.StatusCreated, userRepresentation)
 }
 
+func (UserHandler) DeleteUser(echoContext echo.Context) error {
+	userID := echoContext.Param("id")
+
+	if err := deleteUser(userID); err != nil {
+		return echoContext.NoContent(http.StatusInternalServerError)
+	}
+
+	return echoContext.NoContent(http.StatusOK)
+}
+
 func getUserListFromDatabase() ([]userModel, error) {
 	logger := context.GetAPIContext().GetLogger()
 	logger.Info("[getUserListFromDatabase] Getting all users from database")
@@ -148,7 +156,23 @@ func createUserOnDatabase(user *userModel) error {
 		return err
 	}
 
-	logger.Info("user: ", user)
+	return nil
+}
 
+func deleteUser(userID string) error {
+	logger := context.GetAPIContext().GetLogger()
+	logger.Infof("[deleteUser] Delete user with id %s from database", userID)
+
+	session := context.GetAPIContext().GetMongoSession()
+	defer session.Close()
+
+	connection := session.DB("api").C("users")
+	err := connection.RemoveId(userID)
+	if err != nil {
+		logger.Error("[deleteUser] Error on delete user on database: ", err.Error())
+		return err
+	}
+
+	logger.Infof("[deleteUser] User with id %s delete with success from database", userID)
 	return nil
 }
