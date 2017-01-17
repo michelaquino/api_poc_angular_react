@@ -140,7 +140,7 @@ func getUserListFromDatabase() ([]userModel, error) {
 
 func createUserOnDatabase(user *userModel) error {
 	logger := context.GetAPIContext().GetLogger()
-	logger.Info("[createUserOnDatabase] Getting all users from database")
+	logger.Info("[createUserOnDatabase] Creating user on database")
 
 	session := context.GetAPIContext().GetMongoSession()
 	defer session.Close()
