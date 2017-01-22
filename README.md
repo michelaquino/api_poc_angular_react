@@ -1,7 +1,9 @@
-# api_poc_angular_react
+# Descrição
+Api de suporte aos projetos POC de [Angular](https://github.com/MichelAquino/poc_angular2) 2 e [React](https://github.com/MichelAquino/poc_react)
 
-- Create user
-`curl -i -X POST -d  "{\"name\":\"Michel\",\"email\":\"michel.has@gmail.com\", \"gender\": \"m\"}" http://localhost:8080/user -H "Content-Type: application/json"`
+## Dependências
+- Docker
+- Docker Compose
 
-- Read all users
-`curl http://localhost:8080/users`
+## Para rodar
+`make run`
